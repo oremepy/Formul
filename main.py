@@ -11,7 +11,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-reply_keyboard = [['/help', '/start']]
+reply_keyboard = [['/help', '/start', '/show_formulas']]
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 
 
@@ -33,6 +33,16 @@ async def help(update, context):
         "/help\n")
 
 
+async def show_formulas(update, context):
+    await update.message.reply_text(
+        "Выберете раздел в котором находится формула:")
+
+
+async def tasks(update, context):
+    await update.message.reply_text(
+        "Выберете тренировочное задание:")
+
+
 async def close_keyboard(update, context):
     await update.message.reply_text(
         "Ok",
@@ -44,6 +54,8 @@ def main():
     application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help))
+    application.add_handler(CommandHandler("show_formulas", show_formulas))
+    application.add_handler(CommandHandler("tasks", tasks))
     application.add_handler(CommandHandler("close", close_keyboard))
     application.run_polling()
 
