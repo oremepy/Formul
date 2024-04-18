@@ -1,0 +1,1 @@
+BOT_TOKEN = str("6820792565:AAG1x7DNdz2f6vw47MRjpkm2_pfh5Jc8j80")
