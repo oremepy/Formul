@@ -1,11 +1,9 @@
-from config import BOT_TOKEN, URL_DYNAMIC, URL_WAVES, URL_THERMAL
+from config import BOT_TOKEN, URL_DYNAMIC, URL_WAVES, URL_THERMAL, URL_KINEMATIC, URL_OTHER, URL_ELECTRIC
 import logging
-import requests
 from telegram.ext import Application, MessageHandler, filters, ConversationHandler
 from telegram.ext import CommandHandler
 from telegram import ReplyKeyboardMarkup
 from telegram import ReplyKeyboardRemove
-
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG
@@ -15,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 reply_keyboard = [['/help', '/start'],
                   ['/show_formulas', '/tasks']]
-reply_key2 = [['/waves', '/thermal', '/chapter3'],
+reply_key2 = [['/waves', '/thermal', '/dynamic'],
+              ['/electric', '/kinematic', '/other'],
               ['/back']]
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 markup1 = ReplyKeyboardMarkup(reply_key2, one_time_keyboard=False)
@@ -82,6 +81,33 @@ async def dynamic(update, context):
     return ConversationHandler.END
 
 
+async def electric(update, context):
+    await update.message.reply_text(
+        "Электрические явления:")
+    await update.message.reply_photo(
+        photo=URL_ELECTRIC
+    )
+    return ConversationHandler.END
+
+
+async def kinematic(update, context):
+    await update.message.reply_text(
+        "Кинематика:")
+    await update.message.reply_photo(
+        photo=URL_KINEMATIC
+    )
+    return ConversationHandler.END
+
+
+async def other(update, context):
+    await update.message.reply_text(
+        "Прочие формулы за 7 класс:")
+    await update.message.reply_photo(
+        photo=URL_OTHER
+    )
+    return ConversationHandler.END
+
+
 async def close_keyboard(update, context):
     await update.message.reply_text(
         "Ok",
@@ -130,7 +156,10 @@ def main():
     application.add_handler(CommandHandler("tasks", tasks))
     application.add_handler(CommandHandler("waves", waves))
     application.add_handler(CommandHandler("thermal", thermal))
-    application.add_handler(CommandHandler("chapter3", dynamic))
+    application.add_handler(CommandHandler("dynamic", dynamic))
+    application.add_handler(CommandHandler("kinematic", kinematic))
+    application.add_handler(CommandHandler("electric", electric))
+    application.add_handler(CommandHandler("other", other))
     application.add_handler(CommandHandler("back", back))
     application.add_handler(CommandHandler("close", close_keyboard))
     application.add_handler(conv_handler)
