@@ -1,9 +1,11 @@
-from config import BOT_TOKEN
+from config import BOT_TOKEN, URL_DYNAMIC, URL_WAVES, URL_THERMAL
 import logging
+import requests
 from telegram.ext import Application, MessageHandler, filters, ConversationHandler
 from telegram.ext import CommandHandler
 from telegram import ReplyKeyboardMarkup
 from telegram import ReplyKeyboardRemove
+
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG
@@ -13,13 +15,13 @@ logger = logging.getLogger(__name__)
 
 reply_keyboard = [['/help', '/start'],
                   ['/show_formulas', '/tasks']]
-reply_key2 = [['/chapter1', '/chapter2', '/chapter3'],
+reply_key2 = [['/waves', '/thermal', '/chapter3'],
               ['/back']]
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 markup1 = ReplyKeyboardMarkup(reply_key2, one_time_keyboard=False)
 
 
-async def start(update, contexte):
+async def start(update, context):
     user = update.effective_user
     await update.message.reply_text(
         f"Привет {user.first_name}! Меня зовут Formul, и я помогу тебе найти нужную формулу.\n"
@@ -53,21 +55,30 @@ async def tasks(update, context):
         "Выберете тренировочное задание:")
 
 
-async def chapter1(update, context):
+async def waves(update, context):
     await update.message.reply_text(
-        "Ядерная физика")
+        "Колебания и волны:")
+    await update.message.reply_photo(
+        photo=URL_WAVES
+    )
     return ConversationHandler.END
 
 
-async def chapter2(update, context):
+async def thermal(update, context):
     await update.message.reply_text(
-        "Тепловые процессы")
+        "Тепловые явления:")
+    await update.message.reply_photo(
+        photo=URL_THERMAL
+    )
     return ConversationHandler.END
 
 
-async def chapter3(update, context):
+async def dynamic(update, context):
     await update.message.reply_text(
-        "Механика")
+        "Динамика, законы сохранения:")
+    await update.message.reply_photo(
+        photo=URL_DYNAMIC
+    )
     return ConversationHandler.END
 
 
@@ -100,10 +111,10 @@ conv_handler = ConversationHandler(
     # Вариант с двумя обработчиками, фильтрующими текстовые сообщения.
     states={
         # Функция читает ответ на первый вопрос и задаёт второй.
-        1: [MessageHandler(filters.TEXT & ~filters.COMMAND, chapter1)],
+        1: [MessageHandler(filters.TEXT & ~filters.COMMAND, waves)],
         # Функция читает ответ на второй вопрос и завершает диалог.
-        2: [MessageHandler(filters.TEXT & ~filters.COMMAND, chapter2)],
-        3: [MessageHandler(filters.TEXT & ~filters.COMMAND, chapter3)]
+        2: [MessageHandler(filters.TEXT & ~filters.COMMAND, thermal)],
+        3: [MessageHandler(filters.TEXT & ~filters.COMMAND, dynamic)]
     },
 
     # Точка прерывания диалога. В данном случае — команда /stop.
@@ -117,9 +128,9 @@ def main():
     application.add_handler(CommandHandler("help", help))
     application.add_handler(CommandHandler("show_formulas", show_formulas))
     application.add_handler(CommandHandler("tasks", tasks))
-    application.add_handler(CommandHandler("chapter1", chapter1))
-    application.add_handler(CommandHandler("chapter2", chapter2))
-    application.add_handler(CommandHandler("chapter3", chapter3))
+    application.add_handler(CommandHandler("waves", waves))
+    application.add_handler(CommandHandler("thermal", thermal))
+    application.add_handler(CommandHandler("chapter3", dynamic))
     application.add_handler(CommandHandler("back", back))
     application.add_handler(CommandHandler("close", close_keyboard))
     application.add_handler(conv_handler)
