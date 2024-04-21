@@ -11,11 +11,11 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-reply_keyboard = [['/help', '/start'],
-                  ['/show_formulas', '/tasks']]
-reply_key2 = [['/waves', '/thermal', '/dynamic'],
-              ['/electric', '/kinematic', '/other'],
-              ['/back']]
+reply_keyboard = [['Помощь', 'Старт'],
+                  ['Показать формулы', 'Задания']]
+reply_key2 = [['Волны', 'Тепловые явления', 'Динамика'],
+              ['Электрические явления', 'Кинематика', 'Прочее'],
+              ['Назад']]
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 markup1 = ReplyKeyboardMarkup(reply_key2, one_time_keyboard=False)
 
@@ -28,6 +28,7 @@ async def start(update, context):
         "В каком разделе находится нужная формула?",
         reply_markup=markup
     )
+    return 1
 
 
 async def help(update, context):
@@ -39,6 +40,7 @@ async def help(update, context):
         "/tasks\n"
         "/show_formulas\n"
         "/back\n")
+    return 1
 
 
 async def show_formulas(update, context):
@@ -46,12 +48,13 @@ async def show_formulas(update, context):
         "Выберете раздел в котором находится формула:",
         reply_markup=markup1
     )
-    return 1
+    return 2
 
 
 async def tasks(update, context):
     await update.message.reply_text(
         "Выберете тренировочное задание:")
+    return 1
 
 
 async def waves(update, context):
@@ -60,7 +63,7 @@ async def waves(update, context):
     await update.message.reply_photo(
         photo=URL_WAVES
     )
-    return ConversationHandler.END
+    return 2
 
 
 async def thermal(update, context):
@@ -69,7 +72,7 @@ async def thermal(update, context):
     await update.message.reply_photo(
         photo=URL_THERMAL
     )
-    return ConversationHandler.END
+    return 2
 
 
 async def dynamic(update, context):
@@ -78,7 +81,7 @@ async def dynamic(update, context):
     await update.message.reply_photo(
         photo=URL_DYNAMIC
     )
-    return ConversationHandler.END
+    return 2
 
 
 async def electric(update, context):
@@ -87,7 +90,7 @@ async def electric(update, context):
     await update.message.reply_photo(
         photo=URL_ELECTRIC
     )
-    return ConversationHandler.END
+    return 2
 
 
 async def kinematic(update, context):
@@ -96,7 +99,7 @@ async def kinematic(update, context):
     await update.message.reply_photo(
         photo=URL_KINEMATIC
     )
-    return ConversationHandler.END
+    return 2
 
 
 async def other(update, context):
@@ -105,7 +108,7 @@ async def other(update, context):
     await update.message.reply_photo(
         photo=URL_OTHER
     )
-    return ConversationHandler.END
+    return 2
 
 
 async def close_keyboard(update, context):
@@ -125,41 +128,66 @@ async def back(update, context):
         "Ok",
         reply_markup=markup
     )
-    return ConversationHandler.END
+    return 1
 
 
-conv_handler = ConversationHandler(
-    # Точка входа в диалог.
-    # В данном случае — команда /start. Она задаёт первый вопрос.
-    entry_points=[CommandHandler('show_formulas', show_formulas)],
+async def main_handler(update, context):
+    text = update.message.text
+    # chat_id = update.message.chat_id
+    if text == 'Помощь':
+        return await help(update, context)
+    elif text == 'Старт':
+        return await start(update, context)
+    elif text == 'Показать формулы':
+        return await show_formulas(update, context)
+    elif text == 'Задания':
+        return await tasks(update, context)
 
-    # Состояние внутри диалога.
-    # Вариант с двумя обработчиками, фильтрующими текстовые сообщения.
-    states={
-        # Функция читает ответ на первый вопрос и задаёт второй.
-        1: [MessageHandler(filters.TEXT & ~filters.COMMAND, waves)],
-        # Функция читает ответ на второй вопрос и завершает диалог.
-        2: [MessageHandler(filters.TEXT & ~filters.COMMAND, thermal)],
-        3: [MessageHandler(filters.TEXT & ~filters.COMMAND, dynamic)]
-    },
 
-    # Точка прерывания диалога. В данном случае — команда /stop.
-    fallbacks=[CommandHandler('stop', stop)]
-)
+async def not_main_handler(update, context):
+    text = update.message.text
+    # chat_id = update.message.chat_id
+    if text == 'Волны':
+        return await waves(update, context)
+    elif text == 'Тепловые явления':
+        return await thermal(update, context)
+    elif text == 'Динамика':
+        return await dynamic(update, context)
+    elif text == 'Электрические явления':
+        return await electric(update, context)
+    elif text == 'Кинематика':
+        return await kinematic(update, context)
+    elif text == 'Прочее':
+        return await other(update, context)
+    elif text == 'Назад':
+        return await back(update, context)
 
 
 def main():
+    conv_handler = ConversationHandler(
+        # Точка входа в диалог.
+        entry_points=[CommandHandler('start', start)],
+
+        # Состояние внутри диалога.
+        states={
+            1: [MessageHandler(filters.TEXT & ~filters.COMMAND, main_handler)],
+            2: [MessageHandler(filters.TEXT & ~filters.COMMAND, not_main_handler)],
+        },
+
+        # Точка прерывания диалога. В данном случае — команда /stop.
+        fallbacks=[CommandHandler('stop', stop)]
+    )
     application = Application.builder().token(BOT_TOKEN).build()
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help))
-    application.add_handler(CommandHandler("show_formulas", show_formulas))
-    application.add_handler(CommandHandler("tasks", tasks))
-    application.add_handler(CommandHandler("waves", waves))
-    application.add_handler(CommandHandler("thermal", thermal))
-    application.add_handler(CommandHandler("dynamic", dynamic))
-    application.add_handler(CommandHandler("kinematic", kinematic))
-    application.add_handler(CommandHandler("electric", electric))
-    application.add_handler(CommandHandler("other", other))
+    # application.add_handler(CommandHandler("start", start))
+    # application.add_handler(CommandHandler("help", help))
+    # application.add_handler(CommandHandler("show_formulas", show_formulas))
+    # application.add_handler(CommandHandler("tasks", tasks))
+    # application.add_handler(CommandHandler("waves", waves))
+    # application.add_handler(CommandHandler("thermal", thermal))
+    # application.add_handler(CommandHandler("dynamic", dynamic))
+    # application.add_handler(CommandHandler("kinematic", kinematic))
+    # application.add_handler(CommandHandler("electric", electric))
+    # application.add_handler(CommandHandler("other", other))
     application.add_handler(CommandHandler("back", back))
     application.add_handler(CommandHandler("close", close_keyboard))
     application.add_handler(conv_handler)
