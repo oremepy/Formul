@@ -13,11 +13,15 @@ logger = logging.getLogger(__name__)
 
 reply_keyboard = [['Показать формулы\U0001F4DA', 'Задания\U0001F4CB'],
                   ['Помощь\U0001F4AC']]
-reply_key2 = [['Волны', 'Тепловые явления', 'Динамика'],
-              ['Электрические явления', 'Кинематика', 'Прочее'],
-              ['Назад\U0001F519']]
+key_for_formulas = [['Волны', 'Тепловые явления', 'Динамика'],
+                    ['Электрические явления', 'Кинематика', 'Прочее'],
+                    ['Назад\U0001F519']]
+key_for_tasks = [['Задание 1', 'Задание 2', 'Задание 3'],
+                 ['Задание 4', 'Задание 5', 'Задание 6'],
+                 ['Назад\U0001F519']]
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
-markup1 = ReplyKeyboardMarkup(reply_key2, one_time_keyboard=False)
+markup1 = ReplyKeyboardMarkup(key_for_formulas, one_time_keyboard=False)
+markup2 = ReplyKeyboardMarkup(key_for_tasks, one_time_keyboard=False)
 
 
 async def start(update, context):
@@ -37,10 +41,12 @@ async def help(update, context):
         "будешь готов к заданиям на "
         "закрепление этих формул, нажми "
         "на кнопку задания в первом меню. "
-        )
+        "В заданиях ответ следует писать"
+        " через запятую, а не через точку."
+    )
 
 
-async def show_formulas(update, context):
+async def formulas(update, context):
     await update.message.reply_text(
         "Выберете раздел в котором находится формула:",
         reply_markup=markup1
@@ -50,8 +56,10 @@ async def show_formulas(update, context):
 
 async def tasks(update, context):
     await update.message.reply_text(
-        "Выберете тренировочное задание:")
-    return 1
+        "Выберете тренировочное задание:",
+        reply_markup=markup2,
+    )
+    return 2
 
 
 async def waves(update, context):
@@ -128,15 +136,90 @@ async def back(update, context):
     return 1
 
 
+async def task1(update, context):
+    await update.message.reply_text(
+        "Найдите плотность молока, если 206г молока занимают объем 200 см3? "
+        "Ответ дайте в г/см3.\n"
+        "Чтобы выйти напишите: Назад",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return 3
+
+
+async def task2(update, context):
+    await update.message.reply_text(
+        "Определить мощность тока в электрической лампе, если сопротивление нити акала лампы 400 Ом, а напряжение на "
+        "нити 100 В. Ответ дайте в Вт.\n"
+        "Чтобы выйти напишите: Назад",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return 4
+
+
+async def task3(update, context):
+    await update.message.reply_text(
+        "Частота колебаний крыльев вороны в полете равна в среднем 3 Гц. Сколько взмахов крыльями сделает ворона, "
+        "пролетев путь 650 м со скоростью 13 м/с?\n"
+        "Чтобы выйти напишите: Назад",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return 5
+
+
+async def task4(update, context):
+    await update.message.reply_text(
+        "В начальный момент времени тело находилось в точке с координатой 5 м, а через 2 мин от начала движения — в "
+        "точке с координатой 95 м. Определите скорость тела. Ответ дайте в м/с.\n"
+        "Чтобы выйти напишите: Назад",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return 6
+
+
+async def task5(update, context):
+    await update.message.reply_text(
+        "Груз массой 50 кг равноускоренно поднимают с помощью каната вертикально вверх в течение 2 с на высоту 10 "
+        "м. Определить силу натяжения каната. Ответ дайте в Н.\n"
+        "Чтобы выйти напишите: Назад",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return 7
+
+
+async def task6(update, context):
+    await update.message.reply_text(
+        "В железный котёл массой 5 кг налита вода массой 10 кг. Какое количество теплоты нужно передать котлу с "
+        "водой для изменения их температуры от 10 до 100 °С? Ответ дайте в кДж.\n"
+        "Чтобы выйти напишите: Назад",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return 8
+
+
+async def answer_correct(update, context):
+    await update.message.reply_text(
+        "Правильно!",
+        reply_markup=markup2
+    )
+    return 2
+
+
+async def answer_not_correct(update, context):
+    await update.message.reply_text(
+        "Неверный ответ, попробуйте еще раз.",
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+
 async def main_handler(update, context):
     text = update.message.text
     # chat_id = update.message.chat_id
     if text == 'Помощь\U0001F4AC':
         return await help(update, context)
-    elif text == 'Старт':
+    elif text == 'Старт' or text == '/start':
         return await start(update, context)
     elif text == 'Показать формулы\U0001F4DA':
-        return await show_formulas(update, context)
+        return await formulas(update, context)
     elif text == 'Задания\U0001F4CB':
         return await tasks(update, context)
 
@@ -146,6 +229,9 @@ async def not_main_handler(update, context):
     # chat_id = update.message.chat_id
     if text == 'Помощь\U0001F4AC':
         return await help(update, context)
+    elif text == 'Старт' or text == '/start':
+        return await start(update, context)
+
     elif text == 'Волны':
         return await waves(update, context)
     elif text == 'Тепловые явления':
@@ -158,8 +244,82 @@ async def not_main_handler(update, context):
         return await kinematic(update, context)
     elif text == 'Прочее':
         return await other(update, context)
+
+    elif text == 'Задание 1':
+        return await task1(update, context)
+    elif text == 'Задание 2':
+        return await task2(update, context)
+    elif text == 'Задание 3':
+        return await task3(update, context)
+    elif text == 'Задание 4':
+        return await task4(update, context)
+    elif text == 'Задание 5':
+        return await task5(update, context)
+    elif text == 'Задание 6':
+        return await task6(update, context)
+
     elif text == 'Назад\U0001F519':
         return await back(update, context)
+
+
+async def check_handler1(update, context):
+    text = update.message.text
+    if text == '1,03':
+        return await answer_correct(update, context)
+    elif text == 'Назад':
+        return await back(update, context)
+    else:
+        return await answer_not_correct(update, context)
+
+
+async def check_handler2(update, context):
+    text = update.message.text
+    if text == '25':
+        return await answer_correct(update, context)
+    elif text == 'Назад':
+        return await back(update, context)
+    else:
+        return await answer_not_correct(update, context)
+
+
+async def check_handler3(update, context):
+    text = update.message.text
+    if text == '150':
+        return await answer_correct(update, context)
+    elif text == 'Назад':
+        return await back(update, context)
+    else:
+        return await answer_not_correct(update, context)
+
+
+async def check_handler4(update, context):
+    text = update.message.text
+    if text == '0,75':
+        return await answer_correct(update, context)
+    elif text == 'Назад':
+        return await back(update, context)
+    else:
+        return await answer_not_correct(update, context)
+
+
+async def check_handler5(update, context):
+    text = update.message.text
+    if text == '740':
+        return await answer_correct(update, context)
+    elif text == 'Назад':
+        return await back(update, context)
+    else:
+        return await answer_not_correct(update, context)
+
+
+async def check_handler6(update, context):
+    text = update.message.text
+    if text == '3987':
+        return await answer_correct(update, context)
+    elif text == 'Назад':
+        return await back(update, context)
+    else:
+        return await answer_not_correct(update, context)
 
 
 def main():
@@ -171,15 +331,21 @@ def main():
         states={
             1: [MessageHandler(filters.TEXT & ~filters.COMMAND, main_handler)],
             2: [MessageHandler(filters.TEXT & ~filters.COMMAND, not_main_handler)],
+            3: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_handler1)],
+            4: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_handler2)],
+            5: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_handler3)],
+            6: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_handler4)],
+            7: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_handler5)],
+            8: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_handler6)],
         },
 
         # Точка прерывания диалога. В данном случае — команда /stop.
         fallbacks=[CommandHandler('stop', stop)]
     )
     application = Application.builder().token(BOT_TOKEN).build()
-    application.add_handler(CommandHandler("start", start))
+    # application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help))
-    # application.add_handler(CommandHandler("show_formulas", show_formulas))
+    # application.add_handler(CommandHandler("formulas", formulas))
     # application.add_handler(CommandHandler("tasks", tasks))
     # application.add_handler(CommandHandler("waves", waves))
     # application.add_handler(CommandHandler("thermal", thermal))
