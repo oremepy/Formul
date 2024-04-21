@@ -11,11 +11,11 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-reply_keyboard = [['Помощь', 'Старт'],
-                  ['Показать формулы', 'Задания']]
+reply_keyboard = [['Показать формулы\U0001F4DA', 'Задания\U0001F4CB'],
+                  ['Помощь\U0001F4AC']]
 reply_key2 = [['Волны', 'Тепловые явления', 'Динамика'],
               ['Электрические явления', 'Кинематика', 'Прочее'],
-              ['Назад']]
+              ['Назад\U0001F519']]
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 markup1 = ReplyKeyboardMarkup(reply_key2, one_time_keyboard=False)
 
@@ -23,9 +23,8 @@ markup1 = ReplyKeyboardMarkup(reply_key2, one_time_keyboard=False)
 async def start(update, context):
     user = update.effective_user
     await update.message.reply_text(
-        f"Привет {user.first_name}! Меня зовут Formul, и я помогу тебе найти нужную формулу.\n"
-        "Если ты не понимаешь как пользоваться ботом пиши: /help.\n"
-        "В каком разделе находится нужная формула?",
+        f"Привет {user.first_name}! Меня зовут Formul, и я помогу тебе выучить формулы.\n"
+        "Если ты не понимаешь как пользоваться ботом или тебе нужна дополнительная информация о нем пиши: /help.\n",
         reply_markup=markup
     )
     return 1
@@ -33,14 +32,12 @@ async def start(update, context):
 
 async def help(update, context):
     await update.message.reply_text(
-        "Боту доступны следущие команды:\n"
-        "/start\n"
-        "/help\n"
-        "/close\n"
-        "/tasks\n"
-        "/show_formulas\n"
-        "/back\n")
-    return 1
+        "Сейчас ты можешь открывать любые\n"
+        "формулы и учить их. Как только ты "
+        "будешь готов к заданиям на "
+        "закрепление этих формул, нажми "
+        "на кнопку задания в первом меню. "
+        )
 
 
 async def show_formulas(update, context):
@@ -125,7 +122,7 @@ async def stop(update, context):
 
 async def back(update, context):
     await update.message.reply_text(
-        "Ok",
+        "Вы вернулись к первому меню",
         reply_markup=markup
     )
     return 1
@@ -134,20 +131,22 @@ async def back(update, context):
 async def main_handler(update, context):
     text = update.message.text
     # chat_id = update.message.chat_id
-    if text == 'Помощь':
+    if text == 'Помощь\U0001F4AC':
         return await help(update, context)
     elif text == 'Старт':
         return await start(update, context)
-    elif text == 'Показать формулы':
+    elif text == 'Показать формулы\U0001F4DA':
         return await show_formulas(update, context)
-    elif text == 'Задания':
+    elif text == 'Задания\U0001F4CB':
         return await tasks(update, context)
 
 
 async def not_main_handler(update, context):
     text = update.message.text
     # chat_id = update.message.chat_id
-    if text == 'Волны':
+    if text == 'Помощь\U0001F4AC':
+        return await help(update, context)
+    elif text == 'Волны':
         return await waves(update, context)
     elif text == 'Тепловые явления':
         return await thermal(update, context)
@@ -159,7 +158,7 @@ async def not_main_handler(update, context):
         return await kinematic(update, context)
     elif text == 'Прочее':
         return await other(update, context)
-    elif text == 'Назад':
+    elif text == 'Назад\U0001F519':
         return await back(update, context)
 
 
@@ -178,8 +177,8 @@ def main():
         fallbacks=[CommandHandler('stop', stop)]
     )
     application = Application.builder().token(BOT_TOKEN).build()
-    # application.add_handler(CommandHandler("start", start))
-    # application.add_handler(CommandHandler("help", help))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help))
     # application.add_handler(CommandHandler("show_formulas", show_formulas))
     # application.add_handler(CommandHandler("tasks", tasks))
     # application.add_handler(CommandHandler("waves", waves))
