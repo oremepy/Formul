@@ -12,7 +12,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 reply_keyboard = [['Показать формулы\U0001F4DA', 'Задания\U0001F4CB'],
-                  ['Помощь\U0001F4AC']]
+                  ['Помощь\U0001F4AC'],
+                  ['Закрыть бота\U0000274C']]
 key_for_formulas = [['Волны', 'Тепловые явления', 'Динамика'],
                     ['Электрические явления', 'Кинематика', 'Прочее'],
                     ['Назад\U0001F519']]
@@ -23,7 +24,7 @@ markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 markup1 = ReplyKeyboardMarkup(key_for_formulas, one_time_keyboard=False)
 markup2 = ReplyKeyboardMarkup(key_for_tasks, one_time_keyboard=False)
 
-
+        
 async def start(update, context):
     user = update.effective_user
     await update.message.reply_text(
@@ -124,7 +125,10 @@ async def close_keyboard(update, context):
 
 
 async def stop(update, context):
-    await update.message.reply_text("Всего доброго!")
+    await update.message.reply_text(
+        "Всего доброго!",
+        reply_markup=ReplyKeyboardRemove()
+        )
     return ConversationHandler.END
 
 
@@ -213,7 +217,7 @@ async def answer_not_correct(update, context):
 
 async def main_handler(update, context):
     text = update.message.text
-    # chat_id = update.message.chat_id
+
     if text == 'Помощь\U0001F4AC':
         return await help(update, context)
     elif text == 'Старт' or text == '/start':
@@ -222,11 +226,13 @@ async def main_handler(update, context):
         return await formulas(update, context)
     elif text == 'Задания\U0001F4CB':
         return await tasks(update, context)
+    elif text == 'Закрыть бота\U0000274C':
+        return await stop(update, context)
 
 
 async def not_main_handler(update, context):
     text = update.message.text
-    # chat_id = update.message.chat_id
+
     if text == 'Помощь\U0001F4AC':
         return await help(update, context)
     elif text == 'Старт' or text == '/start':
@@ -264,6 +270,7 @@ async def not_main_handler(update, context):
 
 async def check_handler1(update, context):
     text = update.message.text
+
     if text == '1,03':
         return await answer_correct(update, context)
     elif text == 'Назад':
@@ -274,6 +281,7 @@ async def check_handler1(update, context):
 
 async def check_handler2(update, context):
     text = update.message.text
+
     if text == '25':
         return await answer_correct(update, context)
     elif text == 'Назад':
@@ -284,6 +292,7 @@ async def check_handler2(update, context):
 
 async def check_handler3(update, context):
     text = update.message.text
+
     if text == '150':
         return await answer_correct(update, context)
     elif text == 'Назад':
@@ -294,6 +303,7 @@ async def check_handler3(update, context):
 
 async def check_handler4(update, context):
     text = update.message.text
+
     if text == '0,75':
         return await answer_correct(update, context)
     elif text == 'Назад':
@@ -304,6 +314,7 @@ async def check_handler4(update, context):
 
 async def check_handler5(update, context):
     text = update.message.text
+
     if text == '740':
         return await answer_correct(update, context)
     elif text == 'Назад':
@@ -314,6 +325,7 @@ async def check_handler5(update, context):
 
 async def check_handler6(update, context):
     text = update.message.text
+
     if text == '3987':
         return await answer_correct(update, context)
     elif text == 'Назад':
@@ -324,10 +336,9 @@ async def check_handler6(update, context):
 
 def main():
     conv_handler = ConversationHandler(
-        # Точка входа в диалог.
+
         entry_points=[CommandHandler('start', start)],
 
-        # Состояние внутри диалога.
         states={
             1: [MessageHandler(filters.TEXT & ~filters.COMMAND, main_handler)],
             2: [MessageHandler(filters.TEXT & ~filters.COMMAND, not_main_handler)],
@@ -339,20 +350,10 @@ def main():
             8: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_handler6)],
         },
 
-        # Точка прерывания диалога. В данном случае — команда /stop.
         fallbacks=[CommandHandler('stop', stop)]
     )
     application = Application.builder().token(BOT_TOKEN).build()
-    # application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help))
-    # application.add_handler(CommandHandler("formulas", formulas))
-    # application.add_handler(CommandHandler("tasks", tasks))
-    # application.add_handler(CommandHandler("waves", waves))
-    # application.add_handler(CommandHandler("thermal", thermal))
-    # application.add_handler(CommandHandler("dynamic", dynamic))
-    # application.add_handler(CommandHandler("kinematic", kinematic))
-    # application.add_handler(CommandHandler("electric", electric))
-    # application.add_handler(CommandHandler("other", other))
     application.add_handler(CommandHandler("back", back))
     application.add_handler(CommandHandler("close", close_keyboard))
     application.add_handler(conv_handler)
